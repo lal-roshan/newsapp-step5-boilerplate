@@ -17,6 +17,6 @@ namespace NewsService.Models
             mongoDb = mongoClient.GetDatabase(configuration.GetSection("MongoDB").GetSection("NewsDatabase").Value);
         }
         //Define a MongoCollection to represent the News collection of MongoDB based on UserNews type
-        public IMongoCollection<UserNews> UserNews => mongoDb.GetCollection<UserNews>("userNews");
+        public IMongoCollection<UserNews> News => mongoDb.GetCollection<UserNews>("userNews");
     }
 }

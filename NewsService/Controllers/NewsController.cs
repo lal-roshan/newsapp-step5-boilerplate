@@ -67,7 +67,8 @@ namespace NewsService.Controllers
         {
             try
             {
-                return Ok(await newsService.CreateNews(userId, news));
+                int newsId = await newsService.CreateNews(userId, news);
+                return Created("api/news", newsId);
             }
             catch (NewsAlreadyExistsException ex)
             {

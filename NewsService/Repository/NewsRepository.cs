@@ -1,4 +1,6 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using NewsService.Models;
 using System.Collections.Generic;
@@ -23,25 +25,25 @@ namespace NewsService.Repository
             var builder = Builders<UserNews>.Filter;
             var filter = builder.Eq(u => u.UserId, userId)
                 & builder.ElemMatch(u => u.NewsList, n => n.NewsId == newsId);
-            var update = Builders<UserNews>.Update.Set(u => u.NewsList.SingleOrDefault().Reminder, reminder);
-            var result = await newsContext.UserNews.UpdateOneAsync(filter,update, new UpdateOptions { IsUpsert = true});
-            return result.IsAcknowledged && result.ModifiedCount > 0;
+            var update = Builders<UserNews>.Update.Set("NewsList.$.Reminder", reminder);
+            var result = await newsContext.News.UpdateOneAsync(filter, update, new UpdateOptions { IsUpsert = true });
+            return result.IsAcknowledged && (result.ModifiedCount > 0 || result.UpsertedId != null);
         }
 
         public async Task<int> CreateNews(string userId, News news)
         {
             int newsId = 101;
             var filter = Builders<UserNews>.Filter.Eq(u => u.UserId, userId);
-            var userNewsResult = await newsContext.UserNews.FindAsync(filter);
+            var userNewsResult = await newsContext.News.FindAsync(filter);
             var userNews = await userNewsResult.FirstOrDefaultAsync();
-            if(userNews != null && userNews.NewsList != null && userNews.NewsList.Any())
+            if (userNews != null && userNews.NewsList != null && userNews.NewsList.Any())
             {
                 newsId = userNews.NewsList.Max(n => n.NewsId) + 1;
             }
             news.NewsId = newsId;
             var update = Builders<UserNews>.Update.Push(u => u.NewsList, news);
-            var result = await newsContext.UserNews.UpdateOneAsync(filter, update);
-            if(result.IsAcknowledged && result.ModifiedCount > 0)
+            var result = await newsContext.News.UpdateOneAsync(filter, update, new UpdateOptions { IsUpsert = true });
+            if (result.IsAcknowledged && (result.ModifiedCount > 0 || result.UpsertedId != null))
             {
                 return newsId;
             }
@@ -51,27 +53,28 @@ namespace NewsService.Repository
         public async Task<bool> DeleteNews(string userId, int newsId)
         {
             var builder = Builders<UserNews>.Filter;
-            var filter = builder.Eq(u => u.UserId, userId) & builder.AnyEq(u => u.NewsList.Select(n => n.NewsId), newsId);
-            var update = Builders<UserNews>.Update.Unset(u => u.NewsList.SingleOrDefault());
-            var result = await newsContext.UserNews.UpdateOneAsync(filter, update);
+            var pull = Builders<UserNews>.Update.PullFilter(u => u.NewsList, n => n.NewsId == newsId);
+            var filter = builder.Eq(u => u.UserId, userId) & builder.ElemMatch(u => u.NewsList, n => n.NewsId == newsId);
+            var result = await newsContext.News.UpdateOneAsync(filter, pull);
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
 
         public async Task<bool> DeleteReminder(string userId, int newsId)
         {
             var builder = Builders<UserNews>.Filter;
-            var filter = builder.Eq(u => u.UserId, userId) & builder.AnyEq(u => u.NewsList.Select(n => n.NewsId), newsId);
-            var update = Builders<UserNews>.Update.Unset(u => u.NewsList.SingleOrDefault().Reminder);
-            var result = await newsContext.UserNews.UpdateOneAsync(filter, update);
-            return result.IsAcknowledged && result.ModifiedCount > 0;
+            var filter = builder.Eq(u => u.UserId, userId) & builder.ElemMatch(u => u.NewsList, n => n.NewsId == newsId);
+            var update = Builders<UserNews>.Update.Unset("NewsList.$.Reminder");
+            var result = await newsContext.News.UpdateOneAsync(filter, update, new UpdateOptions { IsUpsert = true });
+            return result.IsAcknowledged && (result.ModifiedCount > 0 || result.UpsertedId != null);
         }
 
         public async Task<List<News>> FindAllNewsByUserId(string userId)
         {
-            var result = await newsContext.UserNews.FindAsync(u => string.Equals(userId, u.UserId));
-            if (await result.AnyAsync())
+            var result = await newsContext.News.FindAsync(u => string.Equals(userId, u.UserId));
+            var userNews = await result.FirstOrDefaultAsync();
+            if (userNews != null)
             {
-                return result.Current.FirstOrDefault().NewsList;
+                return userNews.NewsList;
             }
             return null;
         }
@@ -79,14 +82,13 @@ namespace NewsService.Repository
         public async Task<News> GetNewsById(string userId, int newsId)
         {
             var builder = Builders<UserNews>.Filter;
-            var filter = builder.Eq(u => u.UserId, userId)
-                & builder.ElemMatch(u => u.NewsList, n => n.NewsId == newsId);
-            var result = await newsContext.UserNews.FindAsync(filter);
-            if (await result.AnyAsync())
+            var filter = builder.Eq(u => u.UserId, userId);
+            var projection = Builders<UserNews>.Projection.ElemMatch(u => u.NewsList, n => n.NewsId == newsId);
+            var result = await newsContext.News.FindAsync(filter, new FindOptions<UserNews, UserNews> { Projection = projection});
+            var userNews = await result.SingleOrDefaultAsync();
+            if(userNews != null && userNews.NewsList?.Count == 1)
             {
-                var userNews = await result.SingleOrDefaultAsync();
-                return userNews?.NewsList?.Count > 1 ? null
-                    : userNews?.NewsList?.SingleOrDefault();
+                return userNews.NewsList.First();
             }
             return null;
         }
@@ -96,7 +98,7 @@ namespace NewsService.Repository
             var builder = Builders<UserNews>.Filter;
             var filter = builder.Eq(u => u.UserId, userId)
                 & builder.ElemMatch(u => u.NewsList, n => string.Equals(n.Title, title));
-            var news = await newsContext.UserNews.FindAsync(filter);
+            var news = await newsContext.News.FindAsync(filter);
             if (news.Any())
             {
                 return true;

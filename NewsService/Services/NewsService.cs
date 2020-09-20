@@ -59,8 +59,7 @@ namespace NewsService.Services
 
         public async Task<bool> DeleteNews(string userId, int newsId)
         {
-            var news = await newsRepository.GetNewsById(userId, newsId);
-            if(news != null)
+            if(await newsRepository.GetNewsById(userId, newsId) != null)
             {
                 return await newsRepository.DeleteNews(userId, newsId);
             }

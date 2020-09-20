@@ -68,7 +68,8 @@ namespace UserService.Controllers
         {
             try
             {
-                return Ok(await userService.AddUser(user));
+                bool added = await userService.AddUser(user);
+                return Created("api/user", added);
             }
             catch (UserAlreadyExistsException ex)
             {

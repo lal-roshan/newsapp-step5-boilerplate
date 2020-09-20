@@ -18,7 +18,6 @@ namespace UserService.Models
       * CreatedAt property returns a DateTime data type
       */
         [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
         public string UserId { get; set; }
 
         public string FirstName { get; set; }

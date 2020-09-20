@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using System.Collections.Generic;
 namespace ReminderService.Models
 {
@@ -10,6 +11,12 @@ namespace ReminderService.Models
       * Email Property which returns string data type
       * and NewsReminders List which returns List of ReminderSchedule class type i.e List<ReminderSchedule>
       */
+        [BsonId]
+        public string UserId { get; set; }
+
+        public string Email { get; set; }
+
+        public List<ReminderSchedule> NewsReminders { get; set; }
 
     }
 }

@@ -12,7 +12,6 @@ namespace NewsService.Models
          * NewsList property returns a list of News
          */
         [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
         public string UserId { get; set; }
 
         public List<News> NewsList { get; set; }
