@@ -21,6 +21,8 @@ namespace NewsService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(s => new NewsContext(Configuration));
+            services.AddScoped<INewsRepository, NewsRepository>();
+            services.AddScoped<INewsService, Services.NewsService>();
             services.AddControllers();
             //provide options for Database Context to Register Dependencies
             //Register all dependencies here

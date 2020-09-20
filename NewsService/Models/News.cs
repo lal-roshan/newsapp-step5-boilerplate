@@ -16,6 +16,7 @@ namespace NewsService.Models
     * UrlToImage returns string data type
     * Reminder property returns as Reminder class
     */
+        [BsonId]
         public int NewsId { get; set; }
 
         public string Title { get; set; }

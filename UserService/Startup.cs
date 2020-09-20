@@ -21,6 +21,8 @@ namespace UserService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(s => new UserContext(Configuration));
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserService, Services.UserService >();
             services.AddControllers();
             //provide options for Database Context to Register Dependencies
             //Register all dependencies here
