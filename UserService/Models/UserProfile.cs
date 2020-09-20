@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +17,18 @@ namespace UserService.Models
       * Email property returns a string data type
       * CreatedAt property returns a DateTime data type
       */
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string UserId { get; set; }
+
+        public string FirstName { get; set; }
+
+        public string LastName { get; set; }
+
+        public string Contact { get; set; }
+
+        public string Email { get; set; }
+
+        public DateTime CreatedAt { get; set; }
     }
 }

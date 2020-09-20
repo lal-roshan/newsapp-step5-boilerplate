@@ -14,11 +14,14 @@ namespace UserService.Controllers
      * REST Api standard.
      * 
      */
+    [ApiController]
+    [Route("/api/[controller]")]
     public class UserController : ControllerBase
     {
+        readonly IUserService userService;
         public UserController(IUserService userService)
         {
-
+            this.userService = userService;
         }
 
         /* Implement HttpVerbs and its Functionality asynchronously*/
@@ -30,6 +33,22 @@ namespace UserService.Controllers
          * 1. 200(OK) - If the news found successfully.
          * This handler method should map to the URL "/api/user/{userId}" using HTTP GET method
          */
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> Get(string userId)
+        {
+            try
+            {
+                return Ok(await userService.GetUser(userId));
+            }
+            catch (UserNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Some error occurred, please try again!!");
+            }
+        }
 
         /*
         * Define a handler method which will create a specific UserProfile by reading the
@@ -44,6 +63,22 @@ namespace UserService.Controllers
         * 
         * This handler method should map to the URL "/api/user" using HTTP POST method
         */
+        [HttpPost]
+        public async Task<IActionResult> Post(UserProfile user)
+        {
+            try
+            {
+                return Ok(await userService.AddUser(user));
+            }
+            catch (UserAlreadyExistsException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Some error occurred, please try again!!");
+            }
+        }
 
 
         /*
@@ -56,6 +91,22 @@ namespace UserService.Controllers
         * 
         * This handler method should map to the URL "/api/user/{userId}" using HTTP PUT method.
         */
+        [HttpPut("{userId}")]
+        public async Task<IActionResult> Put(string userId, UserProfile user)
+        {
+            try
+            {
+                return Ok(await userService.UpdateUser(userId, user));
+            }
+            catch (UserNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Some error occurred, please try again!!");
+            }
+        }
 
         /*
              * Define a handler method which will delete a specified UserProfile details from a database.
@@ -66,5 +117,21 @@ namespace UserService.Controllers
              * This handler method should map to the URL "/api/user/{userId}" using HTTP Delete
              * method" where "id" should be replaced by a valid userId without {}
         */
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> Delete(string userId)
+        {
+            try
+            {
+                return Ok(await userService.DeleteUser(userId));
+            }
+            catch (UserNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Some error occurred, please try again!!");
+            }
+        }
     }
 }

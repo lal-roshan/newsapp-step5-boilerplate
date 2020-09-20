@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using NewsService.Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,13 +8,79 @@ namespace NewsService.Repository
 {
     //Inherit the respective interface and implement the methods in
     // this class i.e NewsRepository by inheriting INewsRepository
-    public class NewsRepository
+    public class NewsRepository: INewsRepository
     {
         //define a private variable to represent NewsDbContext
+        readonly NewsContext newsContext;
       
         public NewsRepository(NewsContext newsContext)
         {
-          
+            this.newsContext = newsContext;
+        }
+
+        public async Task<bool> AddOrUpdateReminder(string userId, int newsId, Reminder reminder)
+        {
+        }
+
+        public Task<int> CreateNews(string userId, News news)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<bool> DeleteNews(string userId, int newsId)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<bool> DeleteReminder(string userId, int newsId)
+        {
+            var news = await GetNewsById(userId, newsId);
+        }
+
+        public async Task<List<News>> FindAllNewsByUserId(string userId)
+        {
+            var result = await newsContext.UserNews.FindAsync(u => string.Equals(userId, u.UserId));
+            if(await result.AnyAsync())
+            {
+                return result.Current.FirstOrDefault().NewsList;
+            }
+            return null;
+        }
+
+        public async Task<News> GetNewsById(string userId, int newsId)
+        {
+            var builder = Builders<UserNews>.Filter;
+            var filter = builder.Eq(u => u.UserId, userId) & builder.AnyEq(u => u.NewsList.Select(n => n.NewsId), newsId);
+            var result = await newsContext.UserNews.FindAsync(filter);
+            if (await result.AnyAsync())
+            {
+                var userNews = await result.FirstOrDefaultAsync();
+                return userNews?.NewsList?.Count > 1 ? null
+                    : userNews?.NewsList?.FirstOrDefault();
+            }
+            return null;
+        }
+
+        public async Task<bool> IsNewsExist(string userId, string title)
+        {
+            var builder = Builders<UserNews>.Filter;
+            var filter = builder.Eq(u => u.UserId, userId) & builder.AnyEq(u => u.NewsList.Select(n => n.Title), title);
+            var news = await newsContext.UserNews.FindAsync(filter);
+            if(news.Any())
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> IsReminderExists(string userId, int newsId)
+        {
+            var news = await GetNewsById(userId, newsId);
+            if(news != null && news.Reminder != null)
+            {
+                return true;
+            }
+            return false;
         }
         /* Implement all the methods of respective interface asynchronously*/
 
@@ -35,6 +102,6 @@ namespace NewsService.Repository
         //Delete Reminder method is used to Delete the created Reminder by userId
 
         //IsReminderExists method is used to check the Reminder Exist or not by userId
-        
+
     }
 }
