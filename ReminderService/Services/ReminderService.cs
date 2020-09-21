@@ -27,7 +27,7 @@ namespace ReminderService.Services
             if (!await reminderRepository.IsReminderExists(userId, schedule.NewsId))
             {
                 await reminderRepository.CreateReminder(userId, email, schedule);
-                return await reminderRepository.IsReminderExists(userId, schedule.NewsId);
+                return true;
             }
             else
             {
@@ -37,9 +37,10 @@ namespace ReminderService.Services
 
         public async Task<bool> DeleteReminder(string userId, int newsId)
         {
-            if(await reminderRepository.IsReminderExists(userId, newsId))
+            var deleted = await reminderRepository.DeleteReminder(userId, newsId);
+            if (deleted)
             {
-                return await reminderRepository.DeleteReminder(userId, newsId);
+                return deleted;
             }
             else
             {
@@ -62,9 +63,10 @@ namespace ReminderService.Services
 
         public async Task<bool> UpdateReminder(string userId, ReminderSchedule reminder)
         {
-            if(await reminderRepository.IsReminderExists(userId, reminder.NewsId))
+            var updated = await reminderRepository.UpdateReminder(userId, reminder);
+            if (updated)
             {
-                return await reminderRepository.UpdateReminder(userId, reminder);
+                return updated;
             }
             else
             {
