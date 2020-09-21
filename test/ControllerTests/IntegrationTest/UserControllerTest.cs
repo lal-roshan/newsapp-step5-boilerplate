@@ -11,7 +11,7 @@ using Xunit;
 namespace Test.ControllerTests.IntegrationTest
 {
     [TestCaseOrderer("Test.PriorityOrderer", "test")]
-    public class UserControllerTest:IClassFixture<UserWebApplicationFactory<Startup>>
+    public class UserControllerTest : IClassFixture<UserWebApplicationFactory<Startup>>
     {
         private readonly HttpClient _client;
         public UserControllerTest(UserWebApplicationFactory<Startup> factory)
@@ -65,12 +65,12 @@ namespace Test.ControllerTests.IntegrationTest
             Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
             Assert.True(Convert.ToBoolean(stringResponse));
         }
-        
+
         [Fact, TestPriority(4)]
         public async Task DeleteUserShouldSuccess()
         {
             string userId = "John";
-           
+
             // The endpoint or route of the controller action.
             var httpResponse = await _client.DeleteAsync($"/api/user/{userId}");
 

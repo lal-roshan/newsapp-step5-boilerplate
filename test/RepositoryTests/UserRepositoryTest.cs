@@ -8,7 +8,7 @@ using Xunit;
 namespace Test.RepositoryTests
 {
     [TestCaseOrderer("Test.PriorityOrderer", "test")]
-    public class UserRepositoryTest:IClassFixture<UserDbFixture>
+    public class UserRepositoryTest : IClassFixture<UserDbFixture>
     {
         private readonly UserRepository repository;
         public UserRepositoryTest(UserDbFixture fixture)

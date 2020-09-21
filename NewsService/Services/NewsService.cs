@@ -1,41 +1,39 @@
-﻿using NewsService.Models;
+﻿using NewsService.Exceptions;
+using NewsService.Models;
 using NewsService.Repository;
-using NewsService.Exceptions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 namespace NewsService.Services
 {
-    //Inherit the respective interface and implement the methods in 
-    // this class i.e NewsService by inheriting INewsService
-
+    /// <summary>
+    /// The service class for reminder entity
+    /// </summary>
     public class NewsService : INewsService
     {
-        /*
-        * NewsRepository should  be injected through constructor injection. 
-        * Please note that we should not create NewsRepository object using the new keyword
-        */
+        /// <summary>
+        /// readonly property for repository
+        /// </summary>
         readonly INewsRepository newsRepository;
 
+        /// <summary>
+        /// Parametrised constructor for injecting repository
+        /// </summary>
+        /// <param name="newsRepository"></param>
         public NewsService(INewsRepository newsRepository)
         {
             this.newsRepository = newsRepository;
         }
 
-
-        /* Implement all the methods of respective interface asynchronously*/
-
-        /* Implement CreateNews method to add the new news details*/
-
-        /* Implement AddOrUpdateReminder using userId and newsId*/
-
-        /* Implement DeleteNews method to remove the existing news*/
-
-        /* Implement DeleteReminder method to delte the Reminder using userId*/
-
-        /* Implement FindAllNewsByUserId to get the News Details by userId*/
+        /// <summary>
+        /// Method for adding or updating a reminder of a news
+        /// </summary>
+        /// <param name="userId">The id of the user of the news</param>
+        /// <param name="newsId">The id of the news to whom reminder is to be added or updated</param>
+        /// <param name="reminder">The object with new values for reminder</param>
+        /// <returns>True if operation success else false</returns>
         public async Task<bool> AddOrUpdateReminder(string userId, int newsId, Reminder reminder)
         {
-            if(await newsRepository.GetNewsById(userId, newsId) != null)
+            if (await newsRepository.GetNewsById(userId, newsId) != null)
             {
                 return await newsRepository.AddOrUpdateReminder(userId, newsId, reminder);
             }
@@ -45,9 +43,15 @@ namespace NewsService.Services
             }
         }
 
+        /// <summary>
+        /// Method for creating a news
+        /// </summary>
+        /// <param name="userId">The id of the user who is creating the news</param>
+        /// <param name="news">The properties of the news to be added</param>
+        /// <returns>The id of the newly created news</returns>
         public async Task<int> CreateNews(string userId, News news)
         {
-            if(! await newsRepository.IsNewsExist(userId, news.Title))
+            if (!await newsRepository.IsNewsExist(userId, news.Title))
             {
                 return await newsRepository.CreateNews(userId, news);
             }
@@ -57,6 +61,12 @@ namespace NewsService.Services
             }
         }
 
+        /// <summary>
+        /// Method for deleting a news
+        /// </summary>
+        /// <param name="userId">The id of the user of the news</param>
+        /// <param name="newsId">The id of the news to be deleted</param>
+        /// <returns>True if deletion successful</returns>
         public async Task<bool> DeleteNews(string userId, int newsId)
         {
             var deleted = await newsRepository.DeleteNews(userId, newsId);
@@ -70,9 +80,15 @@ namespace NewsService.Services
             }
         }
 
+        /// <summary>
+        /// Method for deleting reminder of a news
+        /// </summary>
+        /// <param name="userId">The id of the user of the news</param>
+        /// <param name="newsId">The id of the news whose reminder is to be deleted</param>
+        /// <returns>True if deletion is successful</returns>
         public async Task<bool> DeleteReminder(string userId, int newsId)
         {
-            if(await newsRepository.IsReminderExists(userId, newsId))
+            if (await newsRepository.IsReminderExists(userId, newsId))
             {
                 return await newsRepository.DeleteReminder(userId, newsId);
             }
@@ -82,10 +98,15 @@ namespace NewsService.Services
             }
         }
 
+        /// <summary>
+        /// Method for finding all news by the user
+        /// </summary>
+        /// <param name="userId">The id of the user whose news are to be fetched</param>
+        /// <returns>The list of news of the user</returns>
         public async Task<List<News>> FindAllNewsByUserId(string userId)
         {
             var newsList = await newsRepository.FindAllNewsByUserId(userId);
-            if(newsList != null)
+            if (newsList != null)
             {
                 return newsList;
             }

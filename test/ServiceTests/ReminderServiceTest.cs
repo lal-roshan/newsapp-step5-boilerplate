@@ -1,15 +1,16 @@
-﻿using System;
-using Xunit;
-using Moq;
-using System.Threading.Tasks;
+﻿using Moq;
+using ReminderService.Exceptions;
 using ReminderService.Models;
 using ReminderService.Repository;
+using System;
 using System.Collections.Generic;
-using ReminderService.Exceptions;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Test.ServiceTests
 {
-    public class ReminderServiceTest    {
+    public class ReminderServiceTest
+    {
         [Fact]
         public async Task AddReminderShouldReturnReminder()
         {
@@ -21,7 +22,7 @@ namespace Test.ServiceTests
             mockRepo.Setup(repo => repo.CreateReminder(userId, email, reminder));
             var service = new ReminderService.Services.ReminderService(mockRepo.Object);
 
-            var actual= await service.CreateReminder(userId, email, reminder);
+            var actual = await service.CreateReminder(userId, email, reminder);
             Assert.True(actual);
         }
 
@@ -39,7 +40,7 @@ namespace Test.ServiceTests
             Assert.IsAssignableFrom<List<ReminderSchedule>>(actual);
             Assert.Single(actual);
         }
-      
+
 
         [Fact]
         public async Task DeleteReminderShouldSuccess()
@@ -47,7 +48,7 @@ namespace Test.ServiceTests
             string userId = "Jack";
             int newsId = 101;
             var mockRepo = new Mock<IReminderRepository>();
-            mockRepo.Setup(repo => repo.DeleteReminder(userId,newsId)).Returns(Task.FromResult(true));
+            mockRepo.Setup(repo => repo.DeleteReminder(userId, newsId)).Returns(Task.FromResult(true));
             var service = new ReminderService.Services.ReminderService(mockRepo.Object);
 
             var actual = await service.DeleteReminder(userId, newsId);
@@ -58,7 +59,7 @@ namespace Test.ServiceTests
         public async Task UpdateReminderShouldSuccess()
         {
             string userId = "Jack";
-            ReminderSchedule reminder = new ReminderSchedule {NewsId=101, Schedule=DateTime.Now.AddDays(3) };
+            ReminderSchedule reminder = new ReminderSchedule { NewsId = 101, Schedule = DateTime.Now.AddDays(3) };
             var mockRepo = new Mock<IReminderRepository>();
             mockRepo.Setup(repo => repo.UpdateReminder(userId, reminder)).Returns(Task.FromResult(true));
             var service = new ReminderService.Services.ReminderService(mockRepo.Object);
@@ -76,7 +77,7 @@ namespace Test.ServiceTests
             mockRepo.Setup(repo => repo.DeleteReminder(userId, newsId)).Returns(Task.FromResult(false));
             var service = new ReminderService.Services.ReminderService(mockRepo.Object);
 
-            var actual = await Assert.ThrowsAsync<NoReminderFoundException>(() => service.DeleteReminder(userId,newsId));
+            var actual = await Assert.ThrowsAsync<NoReminderFoundException>(() => service.DeleteReminder(userId, newsId));
             Assert.Equal("No reminder found for this news", actual.Message);
         }
 
@@ -84,7 +85,7 @@ namespace Test.ServiceTests
         public async Task UpdateReminderShouldThrowException()
         {
             string userId = "Jack";
-            ReminderSchedule reminder = new ReminderSchedule { NewsId=102, Schedule=DateTime.Now.AddHours(10) };
+            ReminderSchedule reminder = new ReminderSchedule { NewsId = 102, Schedule = DateTime.Now.AddHours(10) };
             var mockRepo = new Mock<IReminderRepository>();
             mockRepo.Setup(repo => repo.UpdateReminder(userId, reminder)).Returns(Task.FromResult(false));
             var service = new ReminderService.Services.ReminderService(mockRepo.Object);
@@ -98,15 +99,15 @@ namespace Test.ServiceTests
         {
             string userId = "Jack";
             string email = "Jack@ymail.com";
-            ReminderSchedule reminder = new ReminderSchedule {NewsId=101, Schedule=DateTime.Now.AddDays(3) };
+            ReminderSchedule reminder = new ReminderSchedule { NewsId = 101, Schedule = DateTime.Now.AddDays(3) };
             var mockRepo = new Mock<IReminderRepository>();
             mockRepo.Setup(repo => repo.IsReminderExists(userId, reminder.NewsId)).Returns(Task.FromResult(true));
             var service = new ReminderService.Services.ReminderService(mockRepo.Object);
 
-            var actual = await Assert.ThrowsAsync<ReminderAlreadyExistsException>(() => service.CreateReminder(userId,email,reminder));
+            var actual = await Assert.ThrowsAsync<ReminderAlreadyExistsException>(() => service.CreateReminder(userId, email, reminder));
             Assert.Equal($"This News already have a reminder", actual.Message);
         }
-        
+
         [Fact]
         public async Task GetRemindersShouldThrowException()
         {

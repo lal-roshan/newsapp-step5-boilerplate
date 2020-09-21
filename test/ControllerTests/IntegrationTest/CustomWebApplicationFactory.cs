@@ -179,7 +179,7 @@ namespace Test.ControllerTests.IntegrationTest
                                    }
                                }
                            }
-                        }); 
+                        });
                     }
                     catch (Exception ex)
                     {
@@ -195,5 +195,5 @@ namespace Test.ControllerTests.IntegrationTest
             reminderDb = null;
         }
     }
-   
+
 }

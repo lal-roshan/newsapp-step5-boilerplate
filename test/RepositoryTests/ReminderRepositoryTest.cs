@@ -9,7 +9,7 @@ using Xunit;
 namespace Test.RepositoryTests
 {
     [TestCaseOrderer("Test.PriorityOrderer", "test")]
-    public class ReminderRepositoryTest:IClassFixture<ReminderDbFixture>
+    public class ReminderRepositoryTest : IClassFixture<ReminderDbFixture>
     {
         private readonly ReminderRepository repository;
         public ReminderRepositoryTest(ReminderDbFixture fixture)
@@ -24,9 +24,9 @@ namespace Test.RepositoryTests
             string email = "john@gmail.com";
             ReminderSchedule reminder = new ReminderSchedule { NewsId = 101, Schedule = DateTime.Now };
 
-            await repository.CreateReminder(userId,email,reminder);
+            await repository.CreateReminder(userId, email, reminder);
 
-            var status =await repository.IsReminderExists(userId, 101);
+            var status = await repository.IsReminderExists(userId, 101);
             Assert.True(status);
         }
 
@@ -45,8 +45,8 @@ namespace Test.RepositoryTests
         public async Task UpdateReminderShouldSuccess()
         {
             string userId = "John";
-            ReminderSchedule reminder = new ReminderSchedule { NewsId=101, Schedule=DateTime.Now.AddDays(7) };
-            var actual = await repository.UpdateReminder(userId,reminder);
+            ReminderSchedule reminder = new ReminderSchedule { NewsId = 101, Schedule = DateTime.Now.AddDays(7) };
+            var actual = await repository.UpdateReminder(userId, reminder);
             Assert.True(actual);
         }
 
@@ -56,7 +56,7 @@ namespace Test.RepositoryTests
             string userId = "John";
             int newsId = 101;
 
-            var actual = await repository.DeleteReminder(userId,newsId);
+            var actual = await repository.DeleteReminder(userId, newsId);
             Assert.True(actual);
         }
 

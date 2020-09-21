@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Test.InfraSetup
 {
-    public class NewsDbFixture:IDisposable
+    public class NewsDbFixture : IDisposable
     {
         private IConfigurationRoot configuration;
         public NewsContext context;

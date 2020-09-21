@@ -13,7 +13,7 @@ namespace Test.ControllerTests.IntegrationTest
 {
 
     [TestCaseOrderer("Test.PriorityOrderer", "test")]
-    public class ReminderControllerTest:IClassFixture<ReminderWebApplicationFactory<Startup>>
+    public class ReminderControllerTest : IClassFixture<ReminderWebApplicationFactory<Startup>>
     {
         private readonly HttpClient _client;
         public ReminderControllerTest(ReminderWebApplicationFactory<Startup> factory)
@@ -37,21 +37,21 @@ namespace Test.ControllerTests.IntegrationTest
             Assert.NotNull(reminder);
             Assert.IsAssignableFrom<List<ReminderSchedule>>(reminder);
             Assert.Single(reminder);
-            Assert.Equal(101,reminder[0].NewsId);
+            Assert.Equal(101, reminder[0].NewsId);
         }
 
         [Fact, TestPriority(2)]
         public async Task PostShouldReturnTrue()
         {
-            Reminder reminder = new Reminder 
+            Reminder reminder = new Reminder
             {
-                UserId="Jack",
-                Email="jack@ymail.com",
-                NewsReminders=new List<ReminderSchedule>
+                UserId = "Jack",
+                Email = "jack@ymail.com",
+                NewsReminders = new List<ReminderSchedule>
                 {
                     new ReminderSchedule
                     { NewsId = 102, Schedule = DateTime.Now.AddDays(2) }
-                } 
+                }
             };
             MediaTypeFormatter formatter = new JsonMediaTypeFormatter();
             // The endpoint or route of the controller action.
@@ -82,11 +82,11 @@ namespace Test.ControllerTests.IntegrationTest
         public async Task UpdateShouldSuccess()
         {
             string userId = "Jack";
-            ReminderSchedule reminder = new ReminderSchedule {NewsId=101, Schedule=DateTime.Now.AddDays(3) };
+            ReminderSchedule reminder = new ReminderSchedule { NewsId = 101, Schedule = DateTime.Now.AddDays(3) };
             MediaTypeFormatter formatter = new JsonMediaTypeFormatter();
 
             // The endpoint or route of the controller action.
-            var httpResponse = await _client.PutAsync($"/api/reminder/{userId}",reminder,formatter);
+            var httpResponse = await _client.PutAsync($"/api/reminder/{userId}", reminder, formatter);
 
             // Must be successful.
             httpResponse.EnsureSuccessStatusCode();

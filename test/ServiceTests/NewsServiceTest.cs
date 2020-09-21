@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using Xunit;
-using Moq;
-using System.Threading.Tasks;
+﻿using Moq;
+using NewsService.Exceptions;
 using NewsService.Models;
 using NewsService.Repository;
-using NewsService.Exceptions;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Test.ServiceTests
 {
@@ -15,14 +15,14 @@ namespace Test.ServiceTests
         public async Task AddNewsShouldReturnNews()
         {
             string userId = "Jack";
-            News news = new News { Title = "chandrayaan2-spacecraft", Content = "The Lander of Chandrayaan-2 was named Vikram after Dr Vikram A Sarabhai", PublishedAt = DateTime.Now};
+            News news = new News { Title = "chandrayaan2-spacecraft", Content = "The Lander of Chandrayaan-2 was named Vikram after Dr Vikram A Sarabhai", PublishedAt = DateTime.Now };
             int newsId = 103;
             var mockRepo = new Mock<INewsRepository>();
-            mockRepo.Setup(repo => repo.IsNewsExist(userId,news.Title)).Returns(Task.FromResult(false));
-            mockRepo.Setup(repo => repo.CreateNews(userId,news)).Returns(Task.FromResult(newsId));
+            mockRepo.Setup(repo => repo.IsNewsExist(userId, news.Title)).Returns(Task.FromResult(false));
+            mockRepo.Setup(repo => repo.CreateNews(userId, news)).Returns(Task.FromResult(newsId));
             var service = new NewsService.Services.NewsService(mockRepo.Object);
 
-            var actual = await service.CreateNews(userId,news);
+            var actual = await service.CreateNews(userId, news);
             Assert.IsAssignableFrom<int>(actual);
             Assert.Equal(103, actual);
         }
@@ -48,10 +48,10 @@ namespace Test.ServiceTests
             int newsId = 101;
             News news = new News { NewsId = 101, Title = "IT industry in 2020", Content = "It is expected to have positive growth in 2020.", PublishedAt = DateTime.Now, UrlToImage = null, Url = null };
             var mockRepo = new Mock<INewsRepository>();
-            mockRepo.Setup(repo => repo.DeleteNews(userId,newsId)).Returns(Task.FromResult(true));
+            mockRepo.Setup(repo => repo.DeleteNews(userId, newsId)).Returns(Task.FromResult(true));
             var service = new NewsService.Services.NewsService(mockRepo.Object);
 
-            var actual = await service.DeleteNews(userId,newsId);
+            var actual = await service.DeleteNews(userId, newsId);
             Assert.True(actual);
         }
 
@@ -60,18 +60,18 @@ namespace Test.ServiceTests
         {
             string userId = "Sam";
             int newsId = 101;
-            Reminder reminder = new Reminder { Schedule=DateTime.Now.AddDays(2) };
+            Reminder reminder = new Reminder { Schedule = DateTime.Now.AddDays(2) };
             News mockNews = new News { NewsId = 101, Title = "chandrayaan2-spacecraft" };
 
             var mockRepo = new Mock<INewsRepository>();
             mockRepo.Setup(repo => repo.GetNewsById(userId, newsId)).Returns(Task.FromResult(mockNews));
-            mockRepo.Setup(repo => repo.AddOrUpdateReminder(userId, newsId,reminder)).Returns(Task.FromResult(true));
+            mockRepo.Setup(repo => repo.AddOrUpdateReminder(userId, newsId, reminder)).Returns(Task.FromResult(true));
             var service = new NewsService.Services.NewsService(mockRepo.Object);
 
-            var actual =await service.AddOrUpdateReminder(userId, newsId, reminder);
+            var actual = await service.AddOrUpdateReminder(userId, newsId, reminder);
             Assert.True(actual);
         }
-        
+
         [Fact]
         public async Task DeleteReminderShouldSuccess()
         {
@@ -93,10 +93,10 @@ namespace Test.ServiceTests
             string userId = "Jack";
             News news = new News { Title = "chandrayaan2-spacecraft", Content = "The Lander of Chandrayaan-2 was named Vikram after Dr Vikram A Sarabhai", PublishedAt = DateTime.Now };
             var mockRepo = new Mock<INewsRepository>();
-            mockRepo.Setup(repo => repo.IsNewsExist(userId,news.Title)).Returns(Task.FromResult(true));
+            mockRepo.Setup(repo => repo.IsNewsExist(userId, news.Title)).Returns(Task.FromResult(true));
             var service = new NewsService.Services.NewsService(mockRepo.Object);
 
-            var actual = await Assert.ThrowsAsync<NewsAlreadyExistsException>(() => service.CreateNews(userId,news));
+            var actual = await Assert.ThrowsAsync<NewsAlreadyExistsException>(() => service.CreateNews(userId, news));
             Assert.Equal($"{userId} have already added this news", actual.Message);
         }
 
@@ -119,10 +119,10 @@ namespace Test.ServiceTests
             string userId = "Jack";
             int newsId = 101;
             var mockRepo = new Mock<INewsRepository>();
-            mockRepo.Setup(repo => repo.DeleteNews(userId,newsId)).Returns(Task.FromResult(false));
+            mockRepo.Setup(repo => repo.DeleteNews(userId, newsId)).Returns(Task.FromResult(false));
             var service = new NewsService.Services.NewsService(mockRepo.Object);
 
-            var actual = await Assert.ThrowsAsync<NoNewsFoundException>(() => service.DeleteNews(userId,newsId));
+            var actual = await Assert.ThrowsAsync<NoNewsFoundException>(() => service.DeleteNews(userId, newsId));
             Assert.Equal($"NewsId {newsId} for {userId} doesn't exist", actual.Message);
         }
         [Fact]
@@ -137,8 +137,8 @@ namespace Test.ServiceTests
             mockRepo.Setup(repo => repo.GetNewsById(userId, newsId)).Returns(Task.FromResult(mockNews));
             var service = new NewsService.Services.NewsService(mockRepo.Object);
 
-            var actual = await Assert.ThrowsAsync<NoNewsFoundException>(()=> service.AddOrUpdateReminder(userId, newsId, reminder));
-            Assert.Equal($"NewsId {newsId} for {userId} doesn't exist",actual.Message);
+            var actual = await Assert.ThrowsAsync<NoNewsFoundException>(() => service.AddOrUpdateReminder(userId, newsId, reminder));
+            Assert.Equal($"NewsId {newsId} for {userId} doesn't exist", actual.Message);
         }
 
         [Fact]

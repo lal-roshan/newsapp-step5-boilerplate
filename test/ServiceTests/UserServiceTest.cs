@@ -19,10 +19,10 @@ namespace Test.ServiceTests
             var mockRepo = new Mock<IUserRepository>();
             mockRepo.Setup(repo => repo.GetUser(user.UserId)).Returns(Task.FromResult(_user));
             mockRepo.Setup(repo => repo.AddUser(user)).Returns(Task.FromResult(true));
-            
+
             var service = new UserService.Services.UserService(mockRepo.Object);
 
-            var actual =await service.AddUser(user);
+            var actual = await service.AddUser(user);
             Assert.True(actual);
         }
 
@@ -37,7 +37,7 @@ namespace Test.ServiceTests
             var actual = await service.GetUser(user.UserId);
             Assert.NotNull(actual);
             Assert.IsAssignableFrom<UserProfile>(actual);
-            Assert.Equal("Johnson",actual.FirstName);
+            Assert.Equal("Johnson", actual.FirstName);
         }
 
         [Fact]
@@ -78,7 +78,7 @@ namespace Test.ServiceTests
             mockRepo.Setup(repo => repo.GetUser(user.UserId)).Returns(Task.FromResult(user));
             var service = new UserService.Services.UserService(mockRepo.Object);
 
-            var actual =await Assert.ThrowsAsync<UserAlreadyExistsException>(()=>service.AddUser(user));
+            var actual = await Assert.ThrowsAsync<UserAlreadyExistsException>(() => service.AddUser(user));
             Assert.Equal($"{user.UserId} is already in use", actual.Message);
         }
 
@@ -100,7 +100,7 @@ namespace Test.ServiceTests
         {
             string userId = "John";
             UserProfile user = null;
-            var mockRepo = new Mock<IUserRepository>();                     
+            var mockRepo = new Mock<IUserRepository>();
             mockRepo.Setup(repo => repo.GetUser(userId)).Returns(Task.FromResult(user));
             var service = new UserService.Services.UserService(mockRepo.Object);
 
@@ -117,7 +117,7 @@ namespace Test.ServiceTests
             mockRepo.Setup(repo => repo.GetUser(userId)).Returns(Task.FromResult(user));
             var service = new UserService.Services.UserService(mockRepo.Object);
 
-            var actual = await Assert.ThrowsAsync<UserNotFoundException>(() => service.UpdateUser(userId,user));
+            var actual = await Assert.ThrowsAsync<UserNotFoundException>(() => service.UpdateUser(userId, user));
             Assert.Equal($"This user id doesn't exist", actual.Message);
         }
     }

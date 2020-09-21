@@ -10,7 +10,7 @@ namespace UserService.Services
     {
         Task<bool> AddUser(UserProfile user);
         Task<UserProfile> GetUser(string userId);
-        Task<bool> UpdateUser(string userId,UserProfile user);
+        Task<bool> UpdateUser(string userId, UserProfile user);
         Task<bool> DeleteUser(string userId);
     }
 }

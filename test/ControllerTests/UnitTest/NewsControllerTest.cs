@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using Xunit;
+﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using NewsService.Services;
-using NewsService.Models;
 using NewsService.Controllers;
 using NewsService.Exceptions;
+using NewsService.Models;
+using NewsService.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Test.ControllerTests.UnitTest
 {
@@ -31,15 +31,15 @@ namespace Test.ControllerTests.UnitTest
         {
             string userId = "Jack";
             int newsId = 102;
-            News news = new News { Title = "chandrayaan2-spacecraft", Content = "The Lander of Chandrayaan-2 was named Vikram after Dr Vikram A Sarabhai", PublishedAt = DateTime.Now, UrlToImage=null, Url=null };
+            News news = new News { Title = "chandrayaan2-spacecraft", Content = "The Lander of Chandrayaan-2 was named Vikram after Dr Vikram A Sarabhai", PublishedAt = DateTime.Now, UrlToImage = null, Url = null };
             var mockService = new Mock<INewsService>();
-            mockService.Setup(svc => svc.CreateNews(userId,news)).Returns(Task.FromResult(newsId));
+            mockService.Setup(svc => svc.CreateNews(userId, news)).Returns(Task.FromResult(newsId));
             var controller = new NewsController(mockService.Object);
 
             var actual = await controller.Post(userId, news);
             var actionResult = Assert.IsType<CreatedResult>(actual);
-            var actionValue=Assert.IsAssignableFrom<int>(actionResult.Value);
-            Assert.Equal(newsId,actionValue);
+            var actionValue = Assert.IsAssignableFrom<int>(actionResult.Value);
+            Assert.Equal(newsId, actionValue);
         }
 
         [Fact]
@@ -48,10 +48,10 @@ namespace Test.ControllerTests.UnitTest
             string userId = "Jack";
             int newsId = 102;
             var mockService = new Mock<INewsService>();
-            mockService.Setup(svc => svc.DeleteNews(userId,newsId)).Returns(Task.FromResult(true));
+            mockService.Setup(svc => svc.DeleteNews(userId, newsId)).Returns(Task.FromResult(true));
             var controller = new NewsController(mockService.Object);
 
-            var actual = await controller.Delete(userId,newsId);
+            var actual = await controller.Delete(userId, newsId);
             var actionResult = Assert.IsType<OkObjectResult>(actual);
             Assert.True(Convert.ToBoolean(actionResult.Value));
         }
@@ -75,10 +75,10 @@ namespace Test.ControllerTests.UnitTest
             string userId = "Jack";
             News news = new News { Title = "2020 FIFA U-17 Women World Cup", Content = "The tournament will be held in India between 2 and 21 November 2020", PublishedAt = DateTime.Now, UrlToImage = null, Url = null };
             var mockService = new Mock<INewsService>();
-            mockService.Setup(svc => svc.CreateNews(userId,news)).Throws(new NewsAlreadyExistsException($"{userId} have already added this news"));
+            mockService.Setup(svc => svc.CreateNews(userId, news)).Throws(new NewsAlreadyExistsException($"{userId} have already added this news"));
             var controller = new NewsController(mockService.Object);
 
-            var actual = await controller.Post(userId,news);
+            var actual = await controller.Post(userId, news);
             var actionResult = Assert.IsType<ConflictObjectResult>(actual);
             Assert.Equal($"{userId} have already added this news", actionResult.Value);
         }
@@ -89,10 +89,10 @@ namespace Test.ControllerTests.UnitTest
             string userId = "Jack";
             int newsId = 103;
             var mockService = new Mock<INewsService>();
-            mockService.Setup(svc => svc.DeleteNews(userId,newsId)).Throws(new NoNewsFoundException($"NewsId {newsId} for {userId} doesn't exist"));
+            mockService.Setup(svc => svc.DeleteNews(userId, newsId)).Throws(new NoNewsFoundException($"NewsId {newsId} for {userId} doesn't exist"));
             var controller = new NewsController(mockService.Object);
 
-            var actual = await controller.Delete(userId,newsId);
+            var actual = await controller.Delete(userId, newsId);
             var actionResult = Assert.IsType<NotFoundObjectResult>(actual);
             Assert.Equal($"NewsId {newsId} for {userId} doesn't exist", actionResult.Value);
         }

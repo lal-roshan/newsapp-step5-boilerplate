@@ -1,43 +1,46 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ReminderService.Exceptions;
 using ReminderService.Models;
 using ReminderService.Services;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 namespace ReminderService.Controllers
 {
-    /*
-    * As in this assignment, we are working with creating RESTful web service, hence annotate
-    * the class with [ApiController] annotation and define the controller level route as per REST Api standard.   
-    */
+    /// <summary>
+    /// Api controller class for Reminder entity
+    /// </summary>
     [ApiController]
     [Route("/api/[controller]")]
     public class ReminderController : ControllerBase
     {
-        /*
-        * ReminderService should  be injected through constructor injection. 
-        * Please note that we should not create Reminderservice object using the new keyword
-        */
+        /// <summary>
+        /// readonly property for service class
+        /// </summary>
         readonly IReminderService reminderService;
 
+        /// <summary>
+        /// Parametrised constructor for injecting the service property
+        /// </summary>
+        /// <param name="userService"></param>
         public ReminderController(IReminderService reminderService)
         {
             this.reminderService = reminderService;
         }
-        /* Implement HttpVerbs and its Functionalities asynchronously*/
 
-        /*
-        * Define a handler method which will get us the reminders by a userId.
-        * 
-        * This handler method should return any one of the status messages basis on
-        * different situations: 
-        * 1. 200(OK) - If the reminder found successfully.
-        * 
-        * This handler method should map to the URL "/api/reminder/{userId}" using HTTP GET method
-        * and also handle the custom exception for the same
-        */
+        /// <summary>
+        /// Http Get method for getting the reminders of a user with provided user Id
+        /// </summary>
+        /// <param name="userId">The id of the user whose reminders are to be fetched</param>
+        /// <response code="200">If reminders were fetched successfully</response>
+        /// <response code="404">If no reminders was found</response>
+        /// <response code="500">If some error occurs</response>
+        /// <returns></returns>
         [HttpGet("{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(string userId)
         {
             try
@@ -54,18 +57,18 @@ namespace ReminderService.Controllers
             }
         }
 
-        /*
-        * Define a handler method which will create a reminder by reading the
-        * Serialized reminder object from request body and save the reminder in
-        * reminder table in database. 
-        * This handler method should return any one of the status messages
-        * basis on different situations: 
-        * 1. 201(CREATED - In case of successful creation of the reminder 
-        * 2. 409(CONFLICT) - In case of duplicate reminder ID
-        * This handler method should map to the URL "/api/reminder" using HTTP POST
-        * method".
-        */
+        /// <summary>
+        /// Http post for adding new reminder
+        /// </summary>
+        /// <param name="reminder">The details of the reminder to be added</param>
+        /// <response code="201">If reminder was added successfully</response>
+        /// <response code="409">If reminder was already present</response>
+        /// <response code="500">If some error occurs</response>
+        /// <returns></returns>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Post(Reminder reminder)
         {
             try
@@ -84,16 +87,19 @@ namespace ReminderService.Controllers
             }
         }
 
-        /*
-        * Define a handler method which will delete a reminder from a database.
-        * This handler method should return any one of the status messages basis on
-        * different situations: 
-        * 1. 200(OK) - If the reminder deleted successfully from database. 
-        * 2. 404(NOT FOUND) - If the reminder with specified userId is  not found. 
-        * This handler method should map to the URL "/api/reminder/{userId}/{newsId}" using HTTP Delete
-        * method" where "id" should be replaced by a valid reminderId without {}
-        */
+        /// <summary>
+        /// Http Delete for deleting a reminder
+        /// </summary>
+        /// <param name="userId">The id of the user whose reminder is to be deleted</param>
+        /// <param name="newsId">The id of the news having the reminder to be deleted</param>
+        /// <response code="200">If reminder was deleted successfully</response>
+        /// <response code="404">If reminder was not found</response>
+        /// <response code="500">If some error occurs</response>
+        /// <returns></returns>
         [HttpDelete("{userId}/{newsId:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete(string userId, int newsId)
         {
             try
@@ -110,18 +116,19 @@ namespace ReminderService.Controllers
             }
         }
 
-        /*
-         * Define a handler method (Put) which will update a reminder by userId,newsId and with Reminder Details
-         * 
-         * This handler method should return any one of the status messages basis on
-         * different situations: 
-         * 1. 200(OK) - If the news updated successfully to the database using userId with newsId
-         * 2. 404(NOT FOUND) - If the news with specified newsId is not found.
-         * 
-         * This handler method should map to the URL "/api/news/userId" using HTTP PUT
-         * method" where "id" should be replaced by a valid userId without {}
-         */
+        /// <summary>
+        /// Http Put method for updating the details of a reminder
+        /// </summary>
+        /// <param name="userId">The id of the user whose reminder is to be updated</param>
+        /// <param name="reminder">The reminder object with new details</param>
+        /// <response code="200">If reminder details was updated successfully</response>
+        /// <response code="404">If reminder not found</response>
+        /// <response code="500">If some error occurs</response>
+        /// <returns></returns>
         [HttpPut("{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Put(string userId, ReminderSchedule reminder)
         {
             try

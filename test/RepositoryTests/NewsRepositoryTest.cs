@@ -9,7 +9,7 @@ using Xunit;
 namespace Test.RepositoryTests
 {
     [TestCaseOrderer("Test.PriorityOrderer", "test")]
-    public class NewsRepositoryTest:IClassFixture<NewsDbFixture>
+    public class NewsRepositoryTest : IClassFixture<NewsDbFixture>
     {
         private readonly NewsRepository repository;
         public NewsRepositoryTest(NewsDbFixture fixture)
@@ -21,9 +21,9 @@ namespace Test.RepositoryTests
         public async Task AddNewsShouldSuccess()
         {
             string userId = "Sam";
-            News news = new News { Title = "chandrayaan2-spacecraft", Content = "The Lander of Chandrayaan-2 was named Vikram after Dr Vikram A Sarabhai", PublishedAt = DateTime.Now};
+            News news = new News { Title = "chandrayaan2-spacecraft", Content = "The Lander of Chandrayaan-2 was named Vikram after Dr Vikram A Sarabhai", PublishedAt = DateTime.Now };
 
-            var actual =await repository.CreateNews(userId,news);
+            var actual = await repository.CreateNews(userId, news);
             Assert.IsAssignableFrom<int>(actual);
             Assert.Equal(102, actual);
         }
@@ -44,7 +44,7 @@ namespace Test.RepositoryTests
             string userId = "Sam";
             var actual = await repository.FindAllNewsByUserId(userId);
             Assert.IsAssignableFrom<List<News>>(actual);
-            Assert.Equal(2,actual.Count);
+            Assert.Equal(2, actual.Count);
         }
 
         [Fact, TestPriority(4)]
@@ -53,7 +53,7 @@ namespace Test.RepositoryTests
             string userId = "Sam";
             string title = "chandrayaan2-spacecraft";
 
-            var actual = await repository.IsNewsExist(userId,title);
+            var actual = await repository.IsNewsExist(userId, title);
             Assert.True(actual);
         }
 
@@ -75,7 +75,7 @@ namespace Test.RepositoryTests
         {
             string userId = "Sam";
             int newsId = 102;
-            var deleted = await repository.DeleteNews(userId,newsId);
+            var deleted = await repository.DeleteNews(userId, newsId);
             Assert.True(deleted);
         }
 
@@ -107,16 +107,16 @@ namespace Test.RepositoryTests
             var deleted = await repository.DeleteNews(userId, newsId);
             Assert.False(deleted);
         }
-       
+
         [Fact, TestPriority(10)]
         public async Task IsNewsExistShouldFail()
         {
             string userId = "Sam";
             string title = "Demo Title";
 
-            var actual = await repository.IsNewsExist(userId,title);
+            var actual = await repository.IsNewsExist(userId, title);
             Assert.False(actual);
         }
-        
+
     }
 }

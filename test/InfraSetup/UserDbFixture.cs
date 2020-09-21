@@ -1,12 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
 using UserService.Models;
 
 namespace Test.InfraSetup
 {
-    public class UserDbFixture:IDisposable
+    public class UserDbFixture : IDisposable
     {
         private IConfigurationRoot configuration;
         public UserContext context;

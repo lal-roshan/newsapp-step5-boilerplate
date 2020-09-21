@@ -1,22 +1,32 @@
 ﻿using MongoDB.Driver;
-using System.Linq;
 using System.Threading.Tasks;
 using UserService.Models;
 namespace UserService.Repository
 {
-    //Inherit the respective interface and implement the methods in 
-    // this class i.e UserRepository by inheriting IUserRepository class 
-    //which is used to implement all methods in the classs
-    public class UserRepository: IUserRepository
+    /// <summary>
+    /// Repository class for fascilitating CRUD operations on user document
+    /// </summary>
+    public class UserRepository : IUserRepository
     {
-        //define a private variable to represent Reminder Database Context
+        /// <summary>
+        /// readonly property for database context
+        /// </summary>
         readonly UserContext userContext;
 
+        /// <summary>
+        /// Parametrised constructor for injecting data context
+        /// </summary>
+        /// <param name="userContext"></param>
         public UserRepository(UserContext userContext)
         {
             this.userContext = userContext;
         }
 
+        /// <summary>
+        /// The method for adding user
+        /// </summary>
+        /// <param name="user">The user details that is to be added</param>
+        /// <returns>True if inserted successfully else false</returns>
         public async Task<bool> AddUser(UserProfile user)
         {
             await userContext.Users.InsertOneAsync(user);
@@ -24,6 +34,11 @@ namespace UserService.Repository
             return await result.AnyAsync();
         }
 
+        /// <summary>
+        /// Method for deleting a user
+        /// </summary>
+        /// <param name="userId">The id of the user to be deleted</param>
+        /// <returns>True if deleted successfully</returns>
         public async Task<bool> DeleteUser(string userId)
         {
             var filter = Builders<UserProfile>.Filter.Where(u => u.UserId == userId);
@@ -31,12 +46,22 @@ namespace UserService.Repository
             return result.IsAcknowledged && result.DeletedCount > 0;
         }
 
+        /// <summary>
+        /// Method for getting details of a user
+        /// </summary>
+        /// <param name="userId">The id of the user whose details are to be fetched</param>
+        /// <returns>The user profile of the requested user</returns>
         public async Task<UserProfile> GetUser(string userId)
         {
             var result = await userContext.Users.FindAsync(u => u.UserId == userId);
             return await result.FirstOrDefaultAsync();
         }
 
+        /// <summary>
+        /// Method to update the details of a user
+        /// </summary>
+        /// <param name="user">The details of the user that is to be updated with</param>
+        /// <returns>True if updation was successful else false</returns>
         public async Task<bool> UpdateUser(UserProfile user)
         {
             var filter = Builders<UserProfile>.Filter.Where(u => u.UserId == user.UserId);
@@ -49,19 +74,5 @@ namespace UserService.Repository
 
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
-
-        //Implement the methods of interface Asynchronously.
-
-        // Implement AddUser method which should be used to add  a new user Profile.  
-
-        // Implement DeleteUser method which should be used to delete an existing user by userId.
-
-
-        // Implement GetUser method which should be used to get a user by userId.
-
-
-
-        // Implement UpdateUser method which should be used to update an existing user by using
-        // UserProfile details.
     }
 }
