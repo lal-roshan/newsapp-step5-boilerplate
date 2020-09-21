@@ -86,7 +86,7 @@ namespace NewsService.Repository
             var projection = Builders<UserNews>.Projection.ElemMatch(u => u.NewsList, n => n.NewsId == newsId);
             var result = await newsContext.News.FindAsync(filter, new FindOptions<UserNews, UserNews> { Projection = projection});
             var userNews = await result.SingleOrDefaultAsync();
-            if(userNews != null && userNews.NewsList?.Count == 1)
+            if(userNews != null && userNews.NewsList != null)
             {
                 return userNews.NewsList.First();
             }

@@ -46,10 +46,10 @@ namespace ReminderService.Repository
         public async Task<bool> IsReminderExists(string userId, int newsId)
         {
             var builder = Builders<Reminder>.Filter;
-            var filter = builder.Eq(r => r.UserId, userId);
-            var projection = Builders<Reminder>.Projection.ElemMatch(u => u.NewsReminders, n => n.NewsId == newsId);
-            var result = await reminderContext.Reminders.FindAsync(filter, new FindOptions<Reminder, Reminder> { Projection = projection});
-            if(result != null)
+            var filter = builder.Eq(r => r.UserId, userId) &
+                builder.ElemMatch(r => r.NewsReminders, n => n.NewsId == newsId);
+            var result = await reminderContext.Reminders.FindAsync(filter);
+            if(await result.FirstOrDefaultAsync() != null)
             {
                 return true;
             }
