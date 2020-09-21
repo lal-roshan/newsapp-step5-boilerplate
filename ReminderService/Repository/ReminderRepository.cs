@@ -8,7 +8,7 @@ namespace ReminderService.Repository
     //Inherit the respective interface and implement the methods in 
     // this class i.e ReminderRepository by inheriting IReminderRepository class 
     //which is used to implement all Data access operations
-    public class ReminderRepository: IReminderRepository
+    public class ReminderRepository : IReminderRepository
     {
         //define a private variable to represent Reminder Database Context
         readonly ReminderContext reminderContext;
@@ -21,9 +21,30 @@ namespace ReminderService.Repository
         public async Task CreateReminder(string userId, string email, ReminderSchedule schedule)
         {
             var builder = Builders<Reminder>.Filter;
-            var filter = builder.Eq(r => r.UserId, userId) & builder.Eq(r => r.Email, email);
-            var update = Builders<Reminder>.Update.Push(r => r.NewsReminders, schedule);
-            await reminderContext.Reminders.UpdateOneAsync(filter, update, new UpdateOptions { IsUpsert = true });
+            var userFilter = builder.Eq(r => r.UserId, userId) & builder.Eq(r => r.Email, email);
+            var result = await reminderContext.Reminders.CountDocumentsAsync(userFilter);
+            if (result == 0)
+            {
+                var newUser = new Reminder
+                {
+                    UserId = userId,
+                    Email = email,
+                    NewsReminders = new List<ReminderSchedule>
+                    {
+                        new ReminderSchedule
+                        {
+                            NewsId = schedule.NewsId,
+                            Schedule = schedule.Schedule
+                        }
+                    }
+                };
+                await reminderContext.Reminders.InsertOneAsync(newUser);
+            }
+            else if (result > 0)
+            {
+                var update = Builders<Reminder>.Update.Push(r => r.NewsReminders, schedule);
+                await reminderContext.Reminders.UpdateOneAsync(userFilter, update, new UpdateOptions { IsUpsert = true });
+            }
         }
 
         public async Task<bool> DeleteReminder(string userId, int newsId)
@@ -48,12 +69,20 @@ namespace ReminderService.Repository
             var builder = Builders<Reminder>.Filter;
             var filter = builder.Eq(r => r.UserId, userId) &
                 builder.ElemMatch(r => r.NewsReminders, n => n.NewsId == newsId);
-            var result = await reminderContext.Reminders.FindAsync(filter);
-            if(await result.FirstOrDefaultAsync() != null)
+            var result = await reminderContext.Reminders.CountDocumentsAsync(filter);
+            if (result > 0)
             {
                 return true;
             }
             return false;
+            //var projection = Builders<Reminder>.Projection.ElemMatch(u => u.NewsReminders, n => n.NewsId == newsId);
+            //var result = await reminderContext.Reminders.FindAsync(filter, new FindOptions<Reminder, Reminder> { Projection = projection });
+            //var userReminder = await result.SingleOrDefaultAsync();
+            //if (userReminder != null && userReminder.NewsReminders?.Count == 1)
+            //{
+            //    return true;
+            //}
+            //return false;
         }
 
         public async Task<bool> UpdateReminder(string userId, ReminderSchedule reminder)
@@ -61,7 +90,7 @@ namespace ReminderService.Repository
             var builder = Builders<Reminder>.Filter;
             var filter = builder.Eq(r => r.UserId, userId)
                 & builder.ElemMatch(r => r.NewsReminders, n => n.NewsId == reminder.NewsId);
-            var update = Builders<Reminder>.Update.Set("NewsReminders.$.Schedule",reminder.Schedule);
+            var update = Builders<Reminder>.Update.Set("NewsReminders.$.Schedule", reminder.Schedule);
             var result = await reminderContext.Reminders.UpdateOneAsync(filter, update);
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }

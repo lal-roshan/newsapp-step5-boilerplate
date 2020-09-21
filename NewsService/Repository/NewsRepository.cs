@@ -32,20 +32,34 @@ namespace NewsService.Repository
 
         public async Task<int> CreateNews(string userId, News news)
         {
-            int newsId = 101;
+            news.NewsId = 101;
             var filter = Builders<UserNews>.Filter.Eq(u => u.UserId, userId);
             var userNewsResult = await newsContext.News.FindAsync(filter);
             var userNews = await userNewsResult.FirstOrDefaultAsync();
-            if (userNews != null && userNews.NewsList != null && userNews.NewsList.Any())
+            if (userNews == null)
             {
-                newsId = userNews.NewsList.Max(n => n.NewsId) + 1;
+                var newUserNews = new UserNews()
+                {
+                    UserId = userId,
+                    NewsList = new List<News>()
+                    {
+                        news
+                    }
+                };
+                await newsContext.News.InsertOneAsync(newUserNews);
+                var inserted = await GetNewsById(userId, news.NewsId);
+                return inserted != null ? inserted.NewsId : -1;
             }
-            news.NewsId = newsId;
+            else if (userNews != null && userNews.NewsList != null && userNews.NewsList.Any())
+            {
+                news.NewsId = userNews.NewsList.Max(n => n.NewsId) + 1;
+            }
+
             var update = Builders<UserNews>.Update.Push(u => u.NewsList, news);
             var result = await newsContext.News.UpdateOneAsync(filter, update, new UpdateOptions { IsUpsert = true });
             if (result.IsAcknowledged && (result.ModifiedCount > 0 || result.UpsertedId != null))
             {
-                return newsId;
+                return news.NewsId;
             }
             return -1;
         }
@@ -82,11 +96,12 @@ namespace NewsService.Repository
         public async Task<News> GetNewsById(string userId, int newsId)
         {
             var builder = Builders<UserNews>.Filter;
-            var filter = builder.Eq(u => u.UserId, userId);
+            var filter = builder.Eq(u => u.UserId, userId) &
+                builder.ElemMatch(u => u.NewsList, n => n.NewsId == newsId);
             var projection = Builders<UserNews>.Projection.ElemMatch(u => u.NewsList, n => n.NewsId == newsId);
-            var result = await newsContext.News.FindAsync(filter, new FindOptions<UserNews, UserNews> { Projection = projection});
+            var result = await newsContext.News.FindAsync(filter, new FindOptions<UserNews, UserNews> { Projection = projection });
             var userNews = await result.SingleOrDefaultAsync();
-            if(userNews != null && userNews.NewsList != null)
+            if (userNews != null && userNews.NewsList?.Count == 1)
             {
                 return userNews.NewsList.First();
             }
